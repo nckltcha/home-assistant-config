@@ -1,0 +1,60 @@
+- id: '1604693650746'
+  alias: Litter Tray
+  description: ''
+  trigger:
+  - type: motion
+    platform: device
+    device_id: 1f6343f71f06e44f9445cf15178d7172
+    entity_id: binary_sensor.litter_tray
+    domain: binary_sensor
+  condition:
+  - condition: state
+    entity_id: input_boolean.cat_cleaning
+    state: 'off'
+  action:
+  - service: notify.mobile_app_pixel_5
+    data:
+      message: Cat has done a poop 🐱💩
+  - service: input_boolean.turn_on
+    data: {}
+    entity_id: input_boolean.cat_litter_clean
+  - service: counter.increment
+    data: {}
+    entity_id: counter.cat_poops
+  mode: single
+- id: '1605467188756'
+  alias: New Automation
+  description: ''
+  trigger:
+  - platform: event
+    event_type: deconz_event
+    event_data:
+      id: tradfri_on_off_switch
+      event: 2002
+  condition: []
+  action:
+  - type: turn_on
+    device_id: c4c021baf5d710a8e8b28f6ed9b3b0fe
+    entity_id: light.nick_s_lamp
+    domain: light
+    brightness_pct: 60
+  - type: turn_on
+    device_id: 75a2276239b07da69fc5ec861978398f
+    entity_id: light.gina_s_lamp
+    domain: light
+    brightness_pct: 60
+  mode: single
+- id: '1605972444668'
+  alias: Washing Finished
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.washing_machine
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - service: notify.mobile_app_pixel_5
+    data:
+      message: Washing has finished. Don't forget to put it in the drier!
+  mode: single

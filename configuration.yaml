@@ -1,0 +1,155 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+homeassistant:
+  customize: !include customize.yaml
+
+frontend:
+  themes: !include_dir_merge_named themes/
+
+http:
+  ssl_certificate: /ssl/fullchain.pem
+  ssl_key: /ssl/privkey.pem
+
+tts:
+  - platform: google_translate
+
+browser_mod:
+
+namecheapdns:
+  host: home
+  domain: nckltcha.co.uk
+  password: !secret name_cheap
+
+hive:
+  username: !secret email
+  password: !secret hive
+
+volvooncall:
+  username: !secret email
+  password: !secret volvo
+
+camera:
+  - platform: ffmpeg
+    name: George Cam
+    input: !secret ezvizlocal
+tuya:
+  username: !secret email
+  password: !secret tuya
+  country_code: 44
+  platform: smart_life
+
+light:
+  - platform: group
+    name: Living Room Lights
+    entities:
+      - light.living_room_lamp
+      - light.living_room_big_lamp
+  - platform: group
+    name: Bedroom Lights
+    entities:
+      - light.nick_s_lamp
+      - light.gina_s_lamp
+  - platform: group
+    name: Bathroom Lights
+    entities:
+      - light.bathroom_spot_1
+      - light.bathroom_spot_2
+      - light.bathroom_spot_3
+      - light.bathroom_spot_4
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+input_boolean:
+  cat_litter_clean:
+    name: Cat Litter Needs Cleaning
+    icon: mdi:cat
+  cat_cleaning:
+    name: Currently Cleaning
+    icon: mdi:spray-bottle
+
+counter:
+  cat_poops:
+    initial: 0
+    name: Cat Poops
+    step: 1
+
+sensor:
+  - platform: rest
+    name: Electricity
+    resource_template: >
+      {% set starttime = (as_timestamp(now()) - (86400)) | timestamp_custom('%Y-%m-%d', True) + 'T00:00:00' %}
+      {% set endtime = (as_timestamp(now())) | timestamp_custom('%Y-%m-%d', True) + 'T00:00:00' %}
+      https://api.octopus.energy/v1/electricity-meter-points/2600000793883/meters/19M1192597/consumption/?period_from={{starttime}}&period_to={{endtime}}&group_by=day
+    headers:
+      Authorization: Basic !secret octopus
+    unit_of_measurement: "kWh"
+    value_template: "{{ value_json.results[0].consumption | round(2) }}"
+    scan_interval: 7200
+    json_attributes_path: "$.results[0]"
+    json_attributes:
+      - interval_start
+      - interval_end
+  - platform: rest
+    name: Gas
+    resource_template: >
+      {% set starttime = (as_timestamp(now()) - (86400)) | timestamp_custom('%Y-%m-%d', True) + 'T00:00:00' %}
+      {% set endtime = (as_timestamp(now())) | timestamp_custom('%Y-%m-%d', True) + 'T00:00:00' %}
+      https://api.octopus.energy/v1/gas-meter-points/7706040902/meters/G4F92044681900/consumption/?period_from={{starttime}}&period_to={{endtime}}&group_by=day
+    headers:
+      Authorization: Basic !secret octopus
+    unit_of_measurement: "m3"
+    value_template: "{{ value_json.results[0].consumption | round(2) }}"
+    scan_interval: 7200
+    json_attributes_path: "$.results[0]"
+    json_attributes:
+      - interval_start
+      - interval_end
+
+  - platform: template
+    sensors:
+      electricity:
+        unit_of_measurement: "kWh"
+        value_template: >
+          {% if states('sensor.electricity_2') == "47" %}
+          {{ (state_attr("sensor.electricity_2", "results") | map(attribute="consumption") | sum ) | round(2) }}
+          {% else %}
+          {{ states('sensor.electricity_2') }}
+          {% endif %}
+      gas:
+        unit_of_measurement: "m3"
+        value_template: >
+          {% if states('sensor.gas_2') == "47" %}
+          {{ (state_attr("sensor.gas_2", "results") | map(attribute="consumption") | sum /11.36 ) | round(2) }}
+          {% else %}
+          {{ states('sensor.gas_2') }}
+          {% endif %}
+      electricity_cost:
+        unit_of_measurement: "£"
+        value_template: >
+          {{ (states('sensor.electricity') | float * 0.1621 + 0.1994) | round(2)}}
+      gas_cost:
+        unit_of_measurement: "£"
+        value_template: >
+          {{ (states('sensor.gas') | float * 0.283 + 0.1785) | round(2)}}
+      downstairs_temp:
+        unit_of_measurement: "°C"
+        value_template: >
+          {{ (state_attr("climate.downstairs_heating", "current_temperature")) }}
+      upstairs_temp:
+        unit_of_measurement: "°C"
+        value_template: >
+          {{ (state_attr("climate.upstairs_heating", "current_temperature")) }}
+
+binary_sensor:
+  - platform: template
+    sensors:
+      washing_machine:
+        friendly_name: "Washing Machine"
+        delay_off:
+          minutes: 2
+        value_template: >-
+          {{ states('sensor.tasmota_energy_current')|float > 0.1 }}

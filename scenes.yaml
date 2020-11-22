@@ -1,0 +1,58 @@
+- id: '1605510304844'
+  name: Morning
+  entities:
+    light.living_room_lamp:
+      min_mireds: 153
+      max_mireds: 370
+      brightness: 207
+      color_temp: 268
+      friendly_name: Living Room Lamp
+      supported_features: 3
+      state: 'on'
+    light.living_room_big_lamp:
+      min_mireds: 153
+      max_mireds: 370
+      brightness: 189
+      color_temp: 270
+      friendly_name: Living Room Big Lamp
+      supported_features: 3
+      state: 'on'
+- id: '1605510898380'
+  name: Watching TV
+  entities:
+    light.living_room_lamp:
+      min_mireds: 153
+      max_mireds: 370
+      brightness: 255
+      color_temp: 163
+      hs_color:
+      - 30
+      - 100
+      rgb_color:
+      - 255
+      - 127
+      - 0
+      xy_color:
+      - 0.612
+      - 0.374
+      friendly_name: Living Room Lamp
+      supported_features: 191
+      state: 'on'
+    light.living_room_big_lamp:
+      min_mireds: 153
+      max_mireds: 370
+      brightness: 255
+      color_temp: 150
+      hs_color:
+      - 30
+      - 100
+      rgb_color:
+      - 255
+      - 127
+      - 0
+      xy_color:
+      - 0.612
+      - 0.374
+      friendly_name: Living Room Big Lamp
+      supported_features: 63
+      state: 'on'
