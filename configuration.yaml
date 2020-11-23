@@ -19,15 +19,15 @@ browser_mod:
 namecheapdns:
   host: home
   domain: nckltcha.co.uk
-  password: !secret name_cheap
+  password: !secret name_cheap_key
 
 hive:
   username: !secret email
-  password: !secret hive
+  password: !secret hive_password
 
 volvooncall:
   username: !secret email
-  password: !secret volvo
+  password: !secret volvo_password
 
 camera:
   - platform: ffmpeg
@@ -35,9 +35,13 @@ camera:
     input: !secret ezvizlocal
 tuya:
   username: !secret email
-  password: !secret tuya
+  password: !secret tuya_password
   country_code: 44
   platform: smart_life
+
+spotify:
+  client_id: !secret spotify_client
+  client_secret: !secret spotify_secret
 
 light:
   - platform: group
@@ -85,7 +89,7 @@ sensor:
       {% set endtime = (as_timestamp(now())) | timestamp_custom('%Y-%m-%d', True) + 'T00:00:00' %}
       https://api.octopus.energy/v1/electricity-meter-points/2600000793883/meters/19M1192597/consumption/?period_from={{starttime}}&period_to={{endtime}}&group_by=day
     headers:
-      Authorization: Basic !secret octopus
+      Authorization: Basic !secret octopus_api_key
     unit_of_measurement: "kWh"
     value_template: "{{ value_json.results[0].consumption | round(2) }}"
     scan_interval: 7200
@@ -100,7 +104,7 @@ sensor:
       {% set endtime = (as_timestamp(now())) | timestamp_custom('%Y-%m-%d', True) + 'T00:00:00' %}
       https://api.octopus.energy/v1/gas-meter-points/7706040902/meters/G4F92044681900/consumption/?period_from={{starttime}}&period_to={{endtime}}&group_by=day
     headers:
-      Authorization: Basic !secret octopus
+      Authorization: Basic !secret octopus_api_key
     unit_of_measurement: "m3"
     value_template: "{{ value_json.results[0].consumption | round(2) }}"
     scan_interval: 7200
